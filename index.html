@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Master: El Texto y la Redacción</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .btn-option {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        }
+        .pulse-timer {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .correct-anim {
+            animation: bounceIn 0.5s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="text-slate-100 flex flex-col justify-between min-h-screen p-4 md:p-8">
+
+    <!-- Header / Navbar -->
+    <header class="max-w-4xl mx-auto w-full flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center font-bold text-xl shadow-lg">
+                <i class="fa-solid fa-pen-nib"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-pink-300 to-amber-200">
+                    TextMaster Trivia
+                </h1>
+                <p class="text-xs text-slate-400">Propiedades del texto & Proceso de Redacción</p>
+            </div>
+        </div>
+
+        <div id="top-stats" class="hidden flex items-center gap-4 text-sm font-semibold">
+            <div class="glass-panel px-3 py-1.5 rounded-lg flex items-center gap-2">
+                <i class="fa-solid fa-fire text-amber-400"></i>
+                <span id="streak-counter">Racha: 0</span>
+            </div>
+            <div class="glass-panel px-3 py-1.5 rounded-lg flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-yellow-400"></i>
+                <span id="score-counter">0 pts</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto w-full flex-grow flex items-center justify-center">
+
+        <!-- SCREEN 1: INICIO -->
+        <div id="screen-start" class="w-full glass-panel rounded-3xl p-6 md:p-10 text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -left-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-12 -right-12 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl"></div>
+
+            <div class="inline-block p-4 bg-indigo-600/30 rounded-2xl mb-4 text-indigo-300 border border-indigo-500/30">
+                <i class="fa-solid fa-graduation-cap text-4xl"></i>
+            </div>
+
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-3">¡Domina la Redacción!</h2>
+            <p class="text-slate-300 mb-8 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
+                Repasa las propiedades del texto (<span class="text-indigo-300 font-semibold">Coherencia, Cohesión, Adecuación</span>) y sus etapas (<span class="text-pink-300 font-semibold">Planificación, Textualización, Revisión</span>) de forma rápida e interactiva.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto mb-8">
+                <button onclick="startGame('challenge')" class="group p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-left transition shadow-lg border border-indigo-400/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-lg">Modo Desafío</span>
+                        <i class="fa-solid fa-stopwatch text-indigo-200 group-hover:scale-110 transition"></i>
+                    </div>
+                    <p class="text-xs text-indigo-200">15 segundos por pregunta. Bonos por velocidad.</p>
+                </button>
+
+                <button onclick="startGame('practice')" class="group p-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-left transition border border-slate-700">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-lg text-slate-200">Modo Estudiar</span>
+                        <i class="fa-solid fa-book-open text-emerald-400 group-hover:scale-110 transition"></i>
+                    </div>
+                    <p class="text-xs text-slate-400">Sin límite de tiempo. Para repasar antes del examen.</p>
+                </button>
+            </div>
+
+            <div class="flex justify-center items-center gap-6 text-xs text-slate-400 border-t border-slate-700/50 pt-4">
+                <span><i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> 10 Preguntas clave</span>
+                <span><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> Retroalimentación al instante</span>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: JUEGO EN CURSO -->
+        <div id="screen-game" class="hidden w-full glass-panel rounded-3xl p-6 md:p-8 shadow-2xl relative">
+            
+            <!-- Progress & Timer Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center text-xs text-slate-400 mb-2 font-semibold">
+                    <span id="question-tracker">Pregunta 1 de 10</span>
+                    <span id="timer-display" class="flex items-center gap-1 text-amber-300 font-bold">
+                        <i class="fa-solid fa-clock"></i> <span id="time-left">15</span>s
+                    </span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700">
+                    <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-2.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Categoría Badge -->
+            <div class="mb-3">
+                <span id="category-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    Propiedades del Texto
+                </span>
+            </div>
+
+            <!-- Pregunta -->
+            <h3 id="question-text" class="text-lg md:text-xl font-bold mb-6 text-white leading-snug">
+                ¿Qué propiedad del texto asegura que las ideas tengan sentido lógico y no se contradigan entre sí?
+            </h3>
+
+            <!-- Opciones de respuesta -->
+            <div id="options-container" class="grid grid-cols-1 gap-3 mb-6">
+                <!-- Se cargan dinámicamente -->
+            </div>
+
+            <!-- Feedback / Explicación (Oculto al inicio) -->
+            <div id="feedback-panel" class="hidden p-4 rounded-2xl mb-4 border text-sm transition-all">
+                <div class="flex items-center gap-2 font-bold mb-1" id="feedback-title">
+                    <i class="fa-solid fa-circle-check"></i> <span>¡Correcto!</span>
+                </div>
+                <p id="feedback-text" class="text-slate-300 text-xs md:text-sm">
+                    La coherencia estructura el significado global del texto.
+                </p>
+            </div>
+
+            <!-- Botón Siguiente -->
+            <div class="flex justify-end">
+                <button id="btn-next" onclick="nextQuestion()" class="hidden px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 font-bold text-sm shadow-lg flex items-center gap-2 transition transform active:scale-95">
+                    <span>Siguiente</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: RESULTADOS -->
+        <div id="screen-results" class="hidden w-full glass-panel rounded-3xl p-6 md:p-10 text-center shadow-2xl">
+            <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-amber-400 to-pink-500 flex items-center justify-center text-4xl mb-4 shadow-lg shadow-pink-500/30">
+                <i class="fa-solid fa-award text-slate-950"></i>
+            </div>
+
+            <h2 class="text-3xl font-extrabold mb-1">¡Resultado Final!</h2>
+            <p id="grade-badge" class="text-indigo-300 font-semibold mb-6 text-sm">Nota estimada: 10/10</p>
+
+            <!-- Grid de estadísticas -->
+            <div class="grid grid-cols-3 gap-3 max-w-md mx-auto mb-8">
+                <div class="bg-slate-800/60 p-3 rounded-2xl border border-slate-700">
+                    <span class="block text-xs text-slate-400">Puntaje</span>
+                    <span id="final-score" class="text-xl font-extrabold text-amber-400">0</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-2xl border border-slate-700">
+                    <span class="block text-xs text-slate-400">Aciertos</span>
+                    <span id="final-hits" class="text-xl font-extrabold text-emerald-400">0/10</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-2xl border border-slate-700">
+                    <span class="block text-xs text-slate-400">Mejor Racha</span>
+                    <span id="final-streak" class="text-xl font-extrabold text-pink-400">0</span>
+                </div>
+            </div>
+
+            <!-- Resumen diagnostico -->
+            <div class="text-left bg-slate-900/60 p-4 rounded-2xl border border-slate-800 max-w-md mx-auto mb-8 text-xs md:text-sm">
+                <h4 class="font-bold text-slate-200 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-indigo-400"></i> Diagnóstico para el examen:
+                </h4>
+                <p id="diagnostic-text" class="text-slate-300 leading-relaxed">
+                    ¡Excelente trabajo! Tienes dominados tanto las propiedades textuales como las fases de redacción.
+                </p>
+            </div>
+
+            <!-- Botones de reinicio -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+                <button onclick="resetGame()" class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 font-bold text-sm shadow-lg transition">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Jugar de nuevo
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 mt-6">
+        Recurso lúdico educativo para preparar exámenes de redacción y comprensión lectora.
+    </footer>
+
+    <!-- LOGIC JAVASCRIPT -->
+    <script>
+        // Banco de Preguntas sobre el Texto y el Proceso de Redacción
+        const questions = [
+            {
+                category: "Propiedades del Texto",
+                question: "¿Qué propiedad textual se encarga de que las ideas del texto tengan coherencia lógica, unidad semántica y no entren en contradicción?",
+                options: [
+                    "Cohesión",
+                    "Coherencia",
+                    "Adecuación",
+                    "Corrección gramatical"
+                ],
+                correct: 1,
+                explanation: "La **Coherencia** se refiere al significado global del texto. Garantiza que las ideas tengan un hilo conductor lógico y un tema central claro."
+            },
+            {
+                category: "Propiedades del Texto",
+                question: "Uso adecuado de conectores ('sin embargo', 'por lo tanto'), pronombres y signos de puntuación para unir oraciones. ¿A qué propiedad corresponde?",
+                options: [
+                    "Cohesión",
+                    "Adecuación",
+                    "Planificación",
+                    "Coherencia"
+                ],
+                correct: 0,
+                explanation: "La **Cohesión** son los mecanismos lingüísticos/gramaticales (conectores, sustituciones, sinonimia) que enlazan las palabras y oraciones entre sí."
+            },
+            {
+                category: "Propiedades del Texto",
+                question: "Si escribes un ensayo académico usando lenguaje formal en lugar de modismos de la calle, estás cumpliendo con la propiedad de:",
+                options: [
+                    "Cohesión sintáctica",
+                    "Adecuación",
+                    "Textualización",
+                    "Recursividad"
+                ],
+                correct: 1,
+                explanation: "La **Adecuación** es adaptar el registro, tono y lenguaje del texto según el destinatario, el propósito y la situación comunicativa."
+            },
+            {
+                category: "Proceso de Redacción",
+                question: "¿Cuál es el primer paso indispensable en el proceso de redacción antes de escribir el borrador?",
+                options: [
+                    "Textualización",
+                    "Revisión y edición",
+                    "Planificación (o preescritura)",
+                    "Publicación"
+                ],
+                correct: 2,
+                explanation: "En la **Planificación** se define el objetivo, el público meta, la estructura y se genera una lluvia de ideas o esquema inicial."
+            },
+            {
+                category: "Proceso de Redacción",
+                question: "¿En qué consiste la etapa de 'Textualización' o elaboración del borrador?",
+                options: [
+                    "En corregir la ortografía final del trabajo.",
+                    "En definir a quién va dirigido el texto.",
+                    "En plasmar y desarrollar las ideas organizadas en oraciones y párrafos.",
+                    "En diseñar la portada y tipografía."
+                ],
+                correct: 2,
+                explanation: "La **Textualización** es el acto de redactar como tal: traducir las ideas del esquema preliminar a lenguaje escrito."
+            },
+            {
+                category: "Proceso de Redacción",
+                question: "¿Por qué se dice que el proceso de redacción es 'recursivo'?",
+                options: [
+                    "Porque debe hacerse estrictamente de forma lineal sin volver atrás.",
+                    "Porque permite regresar a etapas anteriores (revisar, replantear o corregir) en cualquier momento.",
+                    "Porque utiliza recursos digitales para escribir.",
+                    "Porque solo se hace una vez."
+                ],
+                correct: 1,
+                explanation: "Es **recursivo** porque no es lineal: mientras redactas o revisas, puedes volver a planificar o reorganizar ideas cuantas veces sea necesario."
+            },
+            {
+                category: "Propiedades del Texto",
+                question: "Identifica el fallo en el texto: 'Me gusta el helado de chocolate. Mañana se construirá un puente militar en Asia.'",
+                options: [
+                    "Falta de cohesión por exceso de conectores.",
+                    "Falta de adecuación al público público.",
+                    "Falta de coherencia (las oraciones no guardan relación temática).",
+                    "Error de ortografía puntual."
+                ],
+                correct: 2,
+                explanation: "Le falta **coherencia**, pues no existe ninguna relación lógica o temática entre ambos enunciados."
+            },
+            {
+                category: "Proceso de Redacción",
+                question: "Durante la fase de 'Revisión y Edición', el redactor debe concentrarse principalmente en:",
+                options: [
+                    "Buscar ideas en internet únicamente.",
+                    "Evaluar la claridad, ortografía, puntuación, cohesión y pulir la versión final.",
+                    "Crear un esquema de lluvia de ideas inicial.",
+                    "Seleccionar el tipo de papel impreso."
+                ],
+                correct: 1,
+                explanation: "La **Revisión** sirve para leer críticamente el borrador, detectar inconsistencias, corregir errores gramaticales y mejorar el estilo."
+            },
+            {
+                category: "Propiedades del Texto",
+                question: "Mecanismo de cohesión que evita la repetición innecesaria de palabras omitiendo un elemento que se da por entendido (ej: 'Juan fue a la biblioteca; [él] compró un libro'):",
+                options: [
+                    "Elipsis",
+                    "Anáfora",
+                    "Hiperónimo",
+                    "Conector causal"
+                ],
+                correct: 0,
+                explanation: "La **Elipsis** consiste en suprimir palabras voluntariamente sin perder el sentido de la oración para dar fluidez al texto."
+            },
+            {
+                category: "Proceso de Redacción",
+                question: "¿Cuál es una recomendación clave al escribir el primer borrador (textualización)?",
+                options: [
+                    "Detenerse cada 5 segundos a corregir la ortografía de cada palabra.",
+                    "Escribir de corrido dejando fluir las ideas según el plan, sabiendo que luego se revisará.",
+                    "No consultar la planificación previa.",
+                    "Enviar directamente al profesor sin releer."
+                ],
+                correct: 1,
+                explanation: "En la **Textualización** lo ideal es dejar fluir la redacción basándote en tu plan. La corrección exhaustiva se realiza en la etapa de revisión."
+            }
+        ];
+
+        // Variables de estado del juego
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctAnswersCount = 0;
+        let timer = null;
+        let timeLeft = 15;
+        let gameMode = 'challenge'; // 'challenge' o 'practice'
+        let answered = false;
+
+        // Elementos DOM
+        const screenStart = document.getElementById('screen-start');
+        const screenGame = document.getElementById('screen-game');
+        const screenResults = document.getElementById('screen-results');
+        const topStats = document.getElementById('top-stats');
+        
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const categoryBadge = document.getElementById('category-badge');
+        const questionTracker = document.getElementById('question-tracker');
+        const progressBar = document.getElementById('progress-bar');
+        const timerDisplay = document.getElementById('timer-display');
+        const timeLeftSpan = document.getElementById('time-left');
+        const feedbackPanel = document.getElementById('feedback-panel');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const btnNext = document.getElementById('btn-next');
+        const scoreCounter = document.getElementById('score-counter');
+        const streakCounter = document.getElementById('streak-counter');
+
+        function startGame(mode) {
+            gameMode = mode;
+            currentQuestionIndex = 0;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            correctAnswersCount = 0;
+
+            screenStart.classList.add('hidden');
+            screenResults.classList.add('hidden');
+            screenGame.classList.remove('hidden');
+            topStats.classList.remove('hidden');
+
+            if (gameMode === 'practice') {
+                timerDisplay.classList.add('hidden');
+            } else {
+                timerDisplay.classList.remove('hidden');
+            }
+
+            updateHeaderStats();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const q = questions[currentQuestionIndex];
+
+            // Reset UI
+            feedbackPanel.classList.add('hidden');
+            btnNext.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+
+            // Cargar datos
+            questionText.textContent = q.question;
+            categoryBadge.textContent = q.category;
+            questionTracker.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+            // Cargar opciones
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-option w-full p-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/70 text-left font-medium text-sm md:text-base flex items-center justify-between text-slate-200`;
+                btn.innerHTML = `
+                    <span>${opt}</span>
+                    <span class="w-6 h-6 rounded-full bg-slate-700/50 text-xs flex items-center justify-center font-bold text-slate-400 border border-slate-600">${String.fromCharCode(65 + idx)}</span>
+                `;
+                btn.onclick = () => selectOption(idx);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Reiniciar Temporizador si es modo desafío
+            if (gameMode === 'challenge') {
+                resetTimer();
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 15;
+            timeLeftSpan.textContent = timeLeft;
+            timeLeftSpan.parentElement.classList.remove('pulse-timer', 'text-red-400');
+            timeLeftSpan.parentElement.classList.add('text-amber-300');
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timeLeftSpan.textContent = timeLeft;
+
+                if (timeLeft <= 5) {
+                    timeLeftSpan.parentElement.classList.add('pulse-timer', 'text-red-400');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timeOutHandler();
+                }
+            }, 1000);
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            answered = true;
+            clearInterval(timer);
+
+            const q = questions[currentQuestionIndex];
+            const buttons = optionsContainer.children;
+
+            // Deshabilitar botones
+            for (let btn of buttons) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-slate-700/80');
+            }
+
+            if (index === q.correct) {
+                // Correcto
+                buttons[index].classList.remove('bg-slate-800/80', 'border-slate-700/70');
+                buttons[index].classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200', 'correct-anim');
+                buttons[index].querySelector('span:last-child').className = 'w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center';
+                buttons[index].querySelector('span:last-child').innerHTML = '<i class="fa-solid fa-check"></i>';
+
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                correctAnswersCount++;
+
+                // Puntos: Base (100) + Bono Tiempo (timeLeft * 10) + Bono Racha
+                const timeBonus = gameMode === 'challenge' ? timeLeft * 10 : 0;
+                const streakBonus = streak > 1 ? (streak - 1) * 20 : 0;
+                const gainedPoints = 100 + timeBonus + streakBonus;
+                score += gainedPoints;
+
+                showFeedback(true, `¡Muy bien! +${gainedPoints} pts. ${q.explanation}`);
+            } else {
+                // Incorrecto
+                buttons[index].classList.remove('bg-slate-800/80', 'border-slate-700/70');
+                buttons[index].classList.add('bg-rose-950/80', 'border-rose-500', 'text-rose-200');
+                buttons[index].querySelector('span:last-child').className = 'w-6 h-6 rounded-full bg-rose-500 text-slate-950 font-bold text-xs flex items-center justify-center';
+                buttons[index].querySelector('span:last-child').innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+                // Mostrar la correcta
+                buttons[q.correct].classList.remove('bg-slate-800/80', 'border-slate-700/70');
+                buttons[q.correct].classList.add('bg-emerald-950/40', 'border-emerald-500/60', 'text-emerald-300');
+
+                streak = 0;
+                showFeedback(false, `Incorrecto. ${q.explanation}`);
+            }
+
+            updateHeaderStats();
+            btnNext.classList.remove('hidden');
+        }
+
+        function timeOutHandler() {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentQuestionIndex];
+            const buttons = optionsContainer.children;
+
+            for (let btn of buttons) {
+                btn.disabled = true;
+            }
+
+            // Mostrar la correcta
+            buttons[q.correct].classList.remove('bg-slate-800/80', 'border-slate-700/70');
+            buttons[q.correct].classList.add('bg-emerald-950/40', 'border-emerald-500/60', 'text-emerald-300');
+
+            streak = 0;
+            updateHeaderStats();
+            showFeedback(false, `¡Se acabó el tiempo! ${q.explanation}`);
+            btnNext.classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect, text) {
+            feedbackPanel.classList.remove('hidden', 'bg-emerald-950/40', 'border-emerald-500/40', 'text-emerald-300', 'bg-rose-950/40', 'border-rose-500/40', 'text-rose-300');
+            
+            if (isCorrect) {
+                feedbackPanel.classList.add('bg-emerald-950/40', 'border-emerald-500/40', 'text-emerald-300');
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ¡Respuesta Correcta!`;
+            } else {
+                feedbackPanel.classList.add('bg-rose-950/40', 'border-rose-500/40', 'text-rose-300');
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i> Repasa este concepto`;
+            }
+
+            // Formatear negritas de Markdown simple
+            feedbackText.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+
+        function updateHeaderStats() {
+            scoreCounter.textContent = `${score} pts`;
+            streakCounter.textContent = `Racha: ${streak}`;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            screenGame.classList.add('hidden');
+            topStats.classList.add('hidden');
+            screenResults.classList.remove('hidden');
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-hits').textContent = `${correctAnswersCount}/${questions.length}`;
+            document.getElementById('final-streak').textContent = maxStreak;
+
+            const percentage = (correctAnswersCount / questions.length) * 10;
+            const gradeBadge = document.getElementById('grade-badge');
+            const diagnosticText = document.getElementById('diagnostic-text');
+
+            gradeBadge.textContent = `Nota estimada: ${percentage.toFixed(1)} / 10`;
+
+            if (percentage >= 9) {
+                diagnosticText.textContent = "¡Excelente! Dominas con precisión las propiedades del texto (Coherencia, Cohesión, Adecuación) y las etapas del proceso de redacción. ¡Estás listo para sacar un 10 en tu examen!";
+            } else if (percentage >= 7) {
+                diagnosticText.textContent = "¡Buen trabajo! Tienes claros la mayoría de conceptos. Repasa un poco más los mecanismos de cohesión (conectores, elipsis) y la diferencia entre revisión y textualización para asegurar la máxima nota.";
+            } else {
+                diagnosticText.textContent = "Necesitas repasar antes del examen. Recuerda: Coherencia = sentido lógico; Cohesión = conectores/gramática; Adecuación = adaptar al público. Proceso: Planificar → Redactar → Revisar.";
+            }
+        }
+
+        function resetGame() {
+            screenResults.classList.add('hidden');
+            screenStart.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
